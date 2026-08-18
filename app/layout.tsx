@@ -14,6 +14,7 @@ const body = Newsreader({
   variable: '--font-body',
   display: 'swap',
   adjustFontFallback: false,
+  axes: ['opsz'],
 })
 
 const sign = IBM_Plex_Mono({

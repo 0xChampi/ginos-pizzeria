@@ -162,8 +162,37 @@ async function run() {
         scrollWidth: document.documentElement.scrollWidth,
         innerWidth: window.innerWidth,
         images,
+        unloadedCuts: images
+          .filter((img) => /generated|ink-cut/.test(img.src || ''))
+          .filter((img) => !img.width)
+          .map((img) => img.src),
         motionShell: Boolean(document.querySelector('[data-motion-stage]')),
         streets: [...document.querySelectorAll('.street-sign')].map((el) => el.textContent.trim()),
+        skipLink: Boolean(document.querySelector('a.skip-link')),
+        filmPause: Boolean(document.querySelector('.film-pause')),
+        stickyHeader: getComputedStyle(document.querySelector('header')).position === 'sticky',
+        lookButtons: [...document.querySelectorAll('[data-look-switcher] button')].map((button) => ({
+          label: button.getAttribute('aria-label'),
+          pressed: button.getAttribute('aria-pressed') === 'true',
+        })),
+        lookLogos: [...document.querySelectorAll('[data-look-switcher] img')].map((img) => ({
+          src: img.getAttribute('src'),
+          width: img.naturalWidth,
+        })),
+        lookStage: document.querySelector('[data-look-stage]')?.getAttribute('data-look-stage'),
+        lookPoster: document.querySelector('[data-look-stage] img')?.getAttribute('src'),
+        lookPosterLoaded: (() => {
+          const img = document.querySelector('[data-look-stage] img')
+          return Boolean(img && img.complete && img.naturalWidth > 0)
+        })(),
+        elizabeth: Boolean(document.querySelector('[data-elizabeth]')),
+        elizabethBoat: document.querySelector('[data-elizabeth-boat]')?.getBoundingClientRect().x ?? -1,
+        elizabethCopy: /west of the elizabeth/i.test(document.body.innerText),
+        ambientVideo: document.querySelector('[data-ambient-video]')?.getAttribute('src')
+          || document.querySelector('[data-ambient-video] source')?.getAttribute('src'),
+        ambientOpacity: document.querySelector('[data-ambient-video]')
+          ? parseFloat(getComputedStyle(document.querySelector('[data-ambient-video]')).opacity)
+          : 0,
       }
     })()`)
   }
@@ -181,12 +210,75 @@ async function run() {
   check(/giorgio/i.test(desktop.pageText) && /still in the dough/i.test(desktop.pageText), 'Giorgio section is on the page')
   check(desktop.images.some((img) => /giorgio-portrait/.test(img.src) && img.width > 0), 'Giorgio cartoon portrait loaded')
   check(/homemade tiramisu/i.test(desktop.pageText), 'real dessert is named')
+  check(/forno/i.test(desktop.pageText) && /\bpeel\b/i.test(desktop.pageText), 'trade frieze names the corner objects')
   check(desktop.streets.some((s) => /court/i.test(s)) && desktop.streets.some((s) => /queen/i.test(s)), 'both street signs render')
+  check(desktop.skipLink, 'skip link is present')
+  check(desktop.stickyHeader, 'header stays put while you scroll')
   check(desktop.motionShell, 'MotionShell stage is wired')
-  check(desktop.images.every((img) => img.complete && img.width > 0), 'illustrated cut-outs loaded')
+  check(/oven-load/.test(desktop.ambientVideo || ''), 'ATF oven film is in the hero')
+  check(desktop.ambientOpacity > 0.2 && desktop.ambientOpacity < 0.55, `ATF film is translucent (${desktop.ambientOpacity})`)
+  const cuts = desktop.images.filter((img) => /generated|ink-cut/.test(img.src || ''))
+  check(
+    cuts.length >= 6 && cuts.every((img) => img.width > 0),
+    `illustrated cut-outs loaded (${cuts.length}; missing ${JSON.stringify(desktop.unloadedCuts || [])})`,
+  )
   check(!desktop.overflow, `desktop does not overflow (${desktop.scrollWidth}/${desktop.innerWidth})`)
+  check(desktop.lookButtons.length === 4, `four Gino looks sit in the header (${desktop.lookButtons.length})`)
+  check(desktop.lookButtons.every((button) => button.label), 'each look has a name you can tap')
+  check(desktop.lookButtons.filter((button) => button.pressed).length === 1, 'one look is selected at a time')
+  check(desktop.lookLogos.length === 4 && desktop.lookLogos.every((img) => img.width > 0), 'header logos loaded')
+  check(desktop.lookStage === 'crest' && /crest/.test(desktop.lookPoster || ''), 'seal look is the opening poster')
+  check(desktop.lookPosterLoaded, 'opening brand poster painted')
+  check(desktop.elizabeth, 'Elizabeth ferry is on the page')
+  check(desktop.elizabethCopy, 'west of the Elizabeth is named')
   console.log(`PASS desktop screenshot ${DESKTOP_SHOT}`)
 
+  await evaluate(`document.querySelector('[data-look-switcher] button[aria-label*="Heritage"]')?.click()`)
+  await sleep(500)
+  const switched = await evaluate(`(() => {
+    const img = document.querySelector('[data-look-stage] img')
+    return {
+      stage: document.querySelector('[data-look-stage]')?.getAttribute('data-look-stage'),
+      src: img?.getAttribute('src'),
+      loaded: Boolean(img && img.complete && img.naturalWidth > 0),
+      pressed: [...document.querySelectorAll('[data-look-switcher] button')].map((button) => ({
+        label: button.getAttribute('aria-label'),
+        pressed: button.getAttribute('aria-pressed') === 'true',
+      })),
+    }
+  })()`)
+  check(switched.stage === 'heritage' && /heritage/.test(switched.src || ''), 'tapping a logo swaps the look')
+  check(switched.loaded, 'switched brand poster painted')
+  check(switched.pressed.filter((button) => button.pressed).length === 1, 'tap keeps a single selected look')
+  await evaluate(`window.scrollTo(0, 0)`)
+  await sleep(200)
+  const heritageShot = await command('Page.captureScreenshot', { format: 'png', fromSurface: true })
+  await writeFile('/tmp/ginos-look-heritage.png', Buffer.from(heritageShot.data, 'base64'))
+  await evaluate(`document.querySelector('[data-look-switcher] button[aria-label*="Own Gino"]')?.click()`)
+  await sleep(400)
+  const ovenShot = await command('Page.captureScreenshot', { format: 'png', fromSurface: true })
+  await writeFile('/tmp/ginos-look-oven.png', Buffer.from(ovenShot.data, 'base64'))
+  await evaluate(`document.querySelector('[data-look-switcher] button[aria-label*="Box"]')?.click()`)
+  await sleep(400)
+  const boxShot = await command('Page.captureScreenshot', { format: 'png', fromSurface: true })
+  await writeFile('/tmp/ginos-look-box.png', Buffer.from(boxShot.data, 'base64'))
+  await evaluate(`document.querySelector('[data-look-switcher] button[aria-label*="Seal"]')?.click()`)
+  await sleep(300)
+
+  const boatStart = await evaluate(`document.querySelector('[data-elizabeth-boat]')?.getBoundingClientRect().x ?? -1`)
+  await evaluate(`window.scrollTo(0, Math.floor(document.documentElement.scrollHeight * 0.55))`)
+  await sleep(400)
+  const boatMid = await evaluate(`document.querySelector('[data-elizabeth-boat]')?.getBoundingClientRect().x ?? -1`)
+  check(boatMid > boatStart + 40, `ferry sails on scroll (${Math.round(boatStart)} → ${Math.round(boatMid)})`)
+  const riverShot = await command('Page.captureScreenshot', { format: 'png', fromSurface: true })
+  await writeFile('/tmp/ginos-river.png', Buffer.from(riverShot.data, 'base64'))
+  await evaluate(`window.scrollTo(0, 0)`)
+  await sleep(200)
+
+  await evaluate(`document.querySelector('[aria-label="What the corner is made of"]')?.scrollIntoView()`)
+  await sleep(250)
+  const pantryShot = await command('Page.captureScreenshot', { format: 'png', fromSurface: true })
+  await writeFile('/tmp/ginos-pantry.png', Buffer.from(pantryShot.data, 'base64'))
   await evaluate(`window.scrollTo(0, 0)`)
   await sleep(200)
   const heroShot = await command('Page.captureScreenshot', { format: 'png', fromSurface: true })
@@ -215,7 +307,7 @@ async function run() {
 
   ws.close()
   browser.kill()
-  await rm(profile, { recursive: true, force: true })
+  await rm(profile, { recursive: true, force: true }).catch(() => {})
   console.log('ALL CHECKS PASSED')
 }
 
@@ -223,6 +315,6 @@ run().catch(async (error) => {
   console.error('FAIL', error.message)
   if (ws) ws.close()
   if (browser) browser.kill()
-  if (profile) await rm(profile, { recursive: true, force: true })
+  if (profile) await rm(profile, { recursive: true, force: true }).catch(() => {})
   process.exit(1)
 })

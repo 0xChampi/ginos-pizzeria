@@ -219,6 +219,77 @@ export function CallBellDoodle({ className = '', ...rest }: DoodleProps) {
   )
 }
 
+export function FerryDoodle({ className = '', ...rest }: DoodleProps) {
+  return (
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 96 36" className={className} {...rest}>
+      <g fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M10 24c4 6 12 8 22 8h42c8 0 12-3 14-7l-8-3H28Z" />
+        <path d="M40 12h24v10H40Z" />
+        <path d="M46 6h6v6" />
+      </g>
+      <g stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" opacity="0.55">
+        <path d="M46 16h5M56 16h5" />
+        <path d="M6 28h8M2 32h10" />
+      </g>
+    </svg>
+  )
+}
+
+export function CraneDoodle({ className = '', ...rest }: DoodleProps) {
+  return (
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 64 64" className={className} {...rest}>
+      <g fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 56h20M30 56V10" />
+        <path d="M30 16h26" />
+        <path d="M56 16v14" />
+      </g>
+      <g stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" opacity="0.55">
+        <path d="M52 30h8" />
+        <path d="M22 24h8M22 34h8M22 44h8" />
+      </g>
+    </svg>
+  )
+}
+
+export function AnchorDoodle({ className = '', ...rest }: DoodleProps) {
+  return (
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 64 64" className={className} {...rest}>
+      <g fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="32" cy="12" r="5" />
+        <path d="M32 17v28" />
+        <path d="M20 24h24" />
+        <path d="M32 45c-12 0-16 8-16 8M32 45c12 0 16 8 16 8" />
+      </g>
+    </svg>
+  )
+}
+
+export function HullDoodle({ className = '', ...rest }: DoodleProps) {
+  return (
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 120 36" className={className} {...rest}>
+      <g fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 26 20 16h78l14 10H6Z" />
+        <path d="M48 8h14v8H48Z" />
+      </g>
+      <g stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" opacity="0.5">
+        <path d="M76 12h10v6" />
+        <path d="M28 20h8M92 20h6" />
+      </g>
+    </svg>
+  )
+}
+
+export function GullDoodle({ className = '', ...rest }: DoodleProps) {
+  return (
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 64 32" className={className} {...rest}>
+      <g fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
+        <path d="M8 20q12-14 22 0" />
+        <path d="M30 20q12-14 22 0" opacity="0.7" />
+      </g>
+    </svg>
+  )
+}
+
 export function OvenMouthDoodle({ className = '', ...rest }: DoodleProps) {
   return (
     <svg aria-hidden="true" focusable="false" viewBox="0 0 64 64" className={className} {...rest}>

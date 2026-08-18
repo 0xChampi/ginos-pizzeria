@@ -393,17 +393,16 @@ export default function MotionShell({
           ;(entry.target as HTMLElement).dataset.revealed = 'true'
           revealObserver?.unobserve(entry.target)
         }),
-        { threshold: 0.12, rootMargin: '0px 0px -6% 0px' },
+        { threshold: 0, rootMargin: '12% 0px 12% 0px' },
       )
       revealTargets.forEach((t) => revealObserver?.observe(t))
-      // A hash jump or restored scroll position lands AFTER this effect runs, so
-      // anything the jump skipped past never fires an intersection event and
-      // would stay invisible forever. Sweep once the browser has settled.
+      // A hash jump, restored scroll, or a fast wheel tick can skip the
+      // intersection callback, which left later copy stuck at opacity 0.
       const sweepRevealed = () => {
         revealTargets.forEach((t) => {
           if (t.dataset.revealed === 'true') return
           const rect = t.getBoundingClientRect()
-          if (rect.top < window.innerHeight && rect.bottom > 0) {
+          if (rect.top < window.innerHeight * 1.12 && rect.bottom > -window.innerHeight * 0.12) {
             t.dataset.revealed = 'true'
             revealObserver?.unobserve(t)
           }
@@ -411,7 +410,11 @@ export default function MotionShell({
       }
       requestAnimationFrame(() => requestAnimationFrame(sweepRevealed))
       window.addEventListener('hashchange', sweepRevealed)
-      revealCleanup = () => window.removeEventListener('hashchange', sweepRevealed)
+      window.addEventListener('scroll', sweepRevealed, { passive: true })
+      revealCleanup = () => {
+        window.removeEventListener('hashchange', sweepRevealed)
+        window.removeEventListener('scroll', sweepRevealed)
+      }
     } else {
       revealTargets.forEach((t) => { t.dataset.revealed = 'true' })
     }
@@ -419,8 +422,11 @@ export default function MotionShell({
     // Inertial wheel smoothing
     let smoothTarget = window.scrollY
     let smoothFrame = 0
+    const scrollMax = () => Math.max(0, document.documentElement.scrollHeight - (visualViewport?.height ?? window.innerHeight))
     const smoothTick = () => {
       smoothFrame = 0
+      const max = scrollMax()
+      if (smoothTarget > max) smoothTarget = max
       const current = window.scrollY
       const next = current + (smoothTarget - current) * 0.16
       wheelFrames = 3
@@ -435,7 +441,7 @@ export default function MotionShell({
       if (event.ctrlKey) return
       event.preventDefault()
       const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1
-      const max = document.documentElement.scrollHeight - window.innerHeight
+      const max = scrollMax()
       if (!smoothFrame) smoothTarget = window.scrollY
       smoothTarget = clamp(smoothTarget + event.deltaY * unit, 0, max)
       if (!smoothFrame) smoothFrame = window.requestAnimationFrame(smoothTick)

@@ -2,6 +2,7 @@ import type { Config } from 'tailwindcss'
 
 // Gino's palette — Olde Towne brick, Elizabeth River dusk, pizza-box kraft,
 // coal-oven dark, window-lamp amber. Named for the corner, not generic food.
+// Tokens live in globals.css :root; keep this map in lockstep.
 const config: Config = {
   content: ['./app/**/*.{ts,tsx}'],
   theme: {
