@@ -22,6 +22,11 @@ const phase1 = [
     amount: 1350,
   },
   {
+    item: 'Owner dashboard',
+    detail: 'Giorgio changes today’s line, the featured plate, and specials himself. No call to anyone.',
+    amount: 'included' as const,
+  },
+  {
     item: 'Revision rounds',
     detail: 'Color, pantry strip, brand-look switcher, boat, copy fixes. All included.',
     amount: 300,
@@ -45,7 +50,7 @@ const money = (n: number) =>
   n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 
 const familyDiscount = 500
-const phase1Subtotal = phase1.reduce((sum, row) => sum + row.amount, 0)
+const phase1Subtotal = phase1.reduce((sum, row) => sum + (typeof row.amount === 'number' ? row.amount : 0), 0)
 const phase1Total = phase1Subtotal - familyDiscount
 const phase2Total = phase2.reduce((sum, row) => sum + row.amount, 0)
 const phase2Bundle = 6500
@@ -85,7 +90,7 @@ export default function InvoicePage() {
       <section className="mt-10">
         <p className="font-sign text-[0.65rem] font-bold uppercase tracking-[0.2em] text-brick">Phase 1 — due now</p>
         <p className="mt-1 max-w-md text-sm text-oven/70">
-          Live Court & Queen site, logo included. Friends and family rate.
+          Live Court & Queen site, owner dashboard, logo included. Friends and family rate.
         </p>
         <table className="mt-5 w-full border-collapse text-left">
           <thead>
@@ -101,7 +106,9 @@ export default function InvoicePage() {
                   <p className="font-display text-lg font-black uppercase leading-tight">{row.item}</p>
                   <p className="mt-1 text-sm leading-snug text-oven/65">{row.detail}</p>
                 </td>
-                <td className="py-3 text-right font-sign text-sm tabular-nums">{money(row.amount)}</td>
+                <td className="py-3 text-right font-sign text-sm tabular-nums">
+                  {typeof row.amount === 'number' ? money(row.amount) : 'Included'}
+                </td>
               </tr>
             ))}
           </tbody>

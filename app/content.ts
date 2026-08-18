@@ -108,6 +108,12 @@ export const giant = {
   note: 'Not a slice. Not a suggestion.',
 }
 
+export const menuPlates = [
+  ...court.plates.map((plate) => ({ name: plate.name, fill: plate.fill })),
+  ...queen.plates.map((plate) => ({ name: plate.name, fill: plate.fill })),
+  { name: giant.name, fill: giant.fill },
+]
+
 export const asides = [
   'Slice or pie. Do not make it a whole conversation.',
   'Gino’s Bacon Bread Stick exists. So do the Chewy Sticks.',

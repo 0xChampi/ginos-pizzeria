@@ -231,6 +231,7 @@ async function run() {
   check(desktop.lookPosterLoaded, 'opening brand poster painted')
   check(desktop.elizabeth, 'Elizabeth ferry is on the page')
   check(desktop.elizabethCopy, 'west of the Elizabeth is named')
+  check(/back of the house/i.test(desktop.pageText), 'quiet dash link is in the footer')
   console.log(`PASS desktop screenshot ${DESKTOP_SHOT}`)
 
   await evaluate(`document.querySelector('[data-look-switcher] button[aria-label*="Heritage"]')?.click()`)

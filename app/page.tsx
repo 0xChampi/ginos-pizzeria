@@ -25,6 +25,10 @@ import {
   AnchorDoodle,
 } from './_components/GinoSpotArt'
 import { brand, place, hours, court, queen, giant, asides, giorgio } from './content'
+import { readDashData } from './_lib/dash-store'
+import { eventStatusLabel, formatEventDate, upcomingEvents } from './_lib/dash-types'
+
+export const dynamic = 'force-dynamic'
 
 const plane = {
   transform:
@@ -96,7 +100,14 @@ function StreetSign({
   )
 }
 
-export default function Page() {
+function boardFlag(featured: string, name: string, existing?: string) {
+  return featured === name ? 'On the board today' : existing
+}
+
+export default async function Page() {
+  const dash = await readDashData()
+  const specials = upcomingEvents(dash.events)
+
   return (
     <MotionShell enabled>
       <LookProvider>
@@ -179,6 +190,14 @@ export default function Page() {
 
             <p data-reveal className="mt-8 max-w-md text-pretty text-lg leading-relaxed text-oven/80">
               {brand.sub}
+            </p>
+            {dash.todayLine ? (
+              <p data-reveal className="mt-4 max-w-md font-display text-xl italic leading-snug text-brick">
+                {dash.todayLine}
+              </p>
+            ) : null}
+            <p data-reveal className="mt-4 font-sign text-[0.65rem] font-bold uppercase tracking-[0.16em] text-oven/55">
+              On the board · {dash.featuredPlate}
             </p>
 
             <div data-reveal className="mt-8 flex flex-wrap items-center gap-4">
@@ -400,7 +419,9 @@ export default function Page() {
               {court.heading}
             </h3>
             <ul className="mt-8 space-y-5">
-              {court.plates.map((plate, index) => (
+              {court.plates.map((plate, index) => {
+                const flag = boardFlag(dash.featuredPlate, plate.name, 'flag' in plate ? plate.flag : undefined)
+                return (
                 <li key={plate.name} className={`border-t border-oven/15 pt-4 ${index === 0 ? 'pt-6' : ''}`}>
                   <div className="flex flex-wrap items-baseline justify-between gap-3">
                     <h4
@@ -414,15 +435,16 @@ export default function Page() {
                       })()}
                       {plate.name}
                     </h4>
-                    {'flag' in plate && plate.flag ? (
+                    {flag ? (
                       <span className="font-sign text-[0.65rem] font-bold uppercase tracking-[0.16em] text-brick">
-                        {plate.flag}
+                        {flag}
                       </span>
                     ) : null}
                   </div>
                   <p className={`mt-1 max-w-prose text-oven/75 ${index === 0 ? 'text-lg' : ''}`}>{plate.fill}</p>
                 </li>
-              ))}
+                )
+              })}
             </ul>
           </article>
 
@@ -435,7 +457,9 @@ export default function Page() {
               {queen.heading}
             </h3>
             <ul className="mt-8 space-y-5">
-              {queen.plates.map((plate) => (
+              {queen.plates.map((plate) => {
+                const flag = boardFlag(dash.featuredPlate, plate.name, 'flag' in plate ? plate.flag : undefined)
+                return (
                 <li key={plate.name}>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <h4 className="flex items-center gap-2 font-display text-xl font-black uppercase">
@@ -445,15 +469,16 @@ export default function Page() {
                       })()}
                       {plate.name}
                     </h4>
-                    {'flag' in plate && plate.flag ? (
+                    {flag ? (
                       <span className="font-sign text-[0.65rem] font-bold uppercase tracking-[0.16em] text-lamp">
-                        {plate.flag}
+                        {flag}
                       </span>
                     ) : null}
                   </div>
                   <p className="mt-1 text-mozz/75">{plate.fill}</p>
                 </li>
-              ))}
+                )
+              })}
             </ul>
           </article>
         </div>
@@ -467,11 +492,55 @@ export default function Page() {
             height={887}
             className="pointer-events-none absolute -right-6 bottom-0 hidden h-auto w-56 rotate-6 md:block ink-cut"
           />
-          <p className="font-sign text-xs font-bold uppercase tracking-[0.2em] text-lamp">{giant.note}</p>
+          <p className="font-sign text-xs font-bold uppercase tracking-[0.2em] text-lamp">
+            {boardFlag(dash.featuredPlate, giant.name, giant.note)}
+          </p>
           <h3 className="mt-3 font-display text-5xl font-black uppercase leading-none md:text-7xl">{giant.name}</h3>
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-mozz/85">{giant.fill}</p>
         </article>
       </section>
+
+      {specials.length > 0 ? (
+        <section id="board" aria-label="On the board" className="coal-field px-5 py-12 text-mozz md:px-12">
+          <div className="flex flex-wrap items-baseline justify-between gap-3">
+            <p className="font-display text-3xl italic text-brick md:text-4xl">On the board</p>
+            <span className="font-sign text-xs font-bold uppercase tracking-[0.18em] text-mozz/45">
+              From the back of the house
+            </span>
+          </div>
+          <div className="mt-6 border-t border-mozz/25">
+            {specials.map((event) => (
+              <div
+                key={event.id}
+                className="grid gap-2 border-b border-mozz/20 py-6 sm:grid-cols-[11rem_1fr_auto] sm:items-baseline sm:gap-6"
+              >
+                <span className="font-sign text-xs font-bold uppercase tracking-[0.16em] text-lamp">
+                  {formatEventDate(event.date)}
+                  {event.time ? ` · ${event.time}` : ''}
+                </span>
+                <div>
+                  <p className="font-display text-2xl font-black uppercase tracking-[-0.03em]">{event.title}</p>
+                  {event.blurb ? <p className="mt-1 max-w-xl text-sm leading-6 text-mozz/65">{event.blurb}</p> : null}
+                </div>
+                <span
+                  className={`justify-self-start font-sign text-[11px] font-bold uppercase tracking-[0.14em] sm:justify-self-end ${
+                    event.status === 'sold'
+                      ? 'text-mozz/35 line-through'
+                      : event.status === 'fast'
+                        ? 'text-lamp'
+                        : 'text-kraft'
+                  }`}
+                >
+                  {eventStatusLabel[event.status]}
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="mt-5 font-sign text-xs font-bold uppercase tracking-[0.15em] text-mozz/45">
+            Call {brand.phone} before we 86 it
+          </p>
+        </section>
+      ) : null}
 
       <section id="visit" data-scroll-section className="kraft-field relative overflow-hidden px-5 py-20 md:px-12 md:py-28">
         <div
@@ -572,8 +641,11 @@ export default function Page() {
         <span className="font-display text-2xl font-black uppercase text-mozz">
           {brand.wordmark} <span className="text-lamp">Pizzeria</span>
         </span>
-        <span className="font-sign text-[0.7rem] uppercase tracking-[0.16em]">
-          Court & Queen · Olde Towne Portsmouth · {brand.phone}
+        <span className="flex flex-wrap items-center gap-4 font-sign text-[0.7rem] uppercase tracking-[0.16em]">
+          <span>Court & Queen · Olde Towne Portsmouth · {brand.phone}</span>
+          <a href="/dash" className="focus-ring text-mozz/30 transition hover:text-mozz/60">
+            Back of the house
+          </a>
         </span>
       </footer>
       </LookProvider>
