@@ -55,7 +55,7 @@ const phase2 = [
 const money = (n: number) =>
   n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 
-const familyDiscount = 500
+const familyDiscount = 651
 const phase1Subtotal = phase1.reduce((sum, row) => sum + (typeof row.amount === 'number' ? row.amount : 0), 0)
 const phase1Total = phase1Subtotal - familyDiscount
 const phase2Total = phase2.reduce((sum, row) => sum + row.amount, 0)

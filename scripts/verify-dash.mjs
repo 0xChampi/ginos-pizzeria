@@ -90,7 +90,7 @@ async function run() {
   check(/Tech support/.test(invoiceHtml), 'year of support is on the invoice')
   check(/Included/.test(invoiceHtml), 'bundled lines are not billed extra')
   check(/\$150/.test(invoiceHtml) && /\$125/.test(invoiceHtml), 'after-year-1 rate is on the invoice')
-  check(/\$3,000/.test(invoiceHtml), 'amount due stays $3,000')
+  check(/\$2,849/.test(invoiceHtml), 'amount due is $2,849')
 
   const restored = await fetch(`${BASE}/api/dash/data`, {
     method: 'PUT',
