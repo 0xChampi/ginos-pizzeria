@@ -29,7 +29,7 @@ const phase1 = [
   {
     item: 'Tech support, year 1',
     detail:
-      'Keep it up: hosting, break-fix, dash help, small copy and hours. Cap 8 hours over the year. Two business days. Not new pages, not ordering, not a redesign.',
+      'Keep it up: hosting, break-fix, dash help, small copy and hours. Cap 12 hours over the year. Two business days. Not new pages, not ordering, not a redesign.',
     amount: 'included' as const,
   },
   {

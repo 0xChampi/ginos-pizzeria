@@ -87,7 +87,7 @@ async function run() {
   const invoiceHtml = await invoice.text()
   check(invoice.ok, `invoice loads (${invoice.status})`)
   check(/Owner dashboard/.test(invoiceHtml), 'dashboard is on the invoice')
-  check(/Tech support/.test(invoiceHtml), 'year of support is on the invoice')
+  check(/Tech support/.test(invoiceHtml) && /12 hours/.test(invoiceHtml), 'year of support is 12 hours on the invoice')
   check(/Included/.test(invoiceHtml), 'bundled lines are not billed extra')
   check(/\$150/.test(invoiceHtml) && /\$125/.test(invoiceHtml), 'after-year-1 rate is on the invoice')
   check(/\$2,849/.test(invoiceHtml), 'amount due is $2,849')
