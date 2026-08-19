@@ -27,6 +27,12 @@ const phase1 = [
     amount: 'included' as const,
   },
   {
+    item: 'Tech support, year 1',
+    detail:
+      'Keep it up: hosting, break-fix, dash help, small copy and hours. Cap 8 hours over the year. Two business days. Not new pages, not ordering, not a redesign.',
+    amount: 'included' as const,
+  },
+  {
     item: 'Revision rounds',
     detail: 'Color, pantry strip, brand-look switcher, boat, copy fixes. All included.',
     amount: 300,
@@ -90,7 +96,7 @@ export default function InvoicePage() {
       <section className="mt-10">
         <p className="font-sign text-[0.65rem] font-bold uppercase tracking-[0.2em] text-brick">Phase 1 — due now</p>
         <p className="mt-1 max-w-md text-sm text-oven/70">
-          Live Court & Queen site, owner dashboard, logo included. Friends and family rate.
+          Live Court & Queen site, owner dashboard, year of support, logo included. Friends and family rate.
         </p>
         <table className="mt-5 w-full border-collapse text-left">
           <thead>
@@ -129,6 +135,14 @@ export default function InvoicePage() {
         </div>
       </section>
 
+      <section className="mt-10">
+        <p className="font-sign text-[0.65rem] font-bold uppercase tracking-[0.2em] text-oven/55">After year 1</p>
+        <p className="mt-2 max-w-lg text-sm leading-relaxed text-oven/75">
+          {money(150)} a month keeps hosting and the same kind of help — up to 2 hours a month. Extra work is{' '}
+          {money(125)} an hour. He can stop anytime. Nothing auto-renews unless he says keep it.
+        </p>
+      </section>
+
       <section className="mt-12 border border-oven/20 bg-kraft/25 px-5 py-6 md:px-7">
         <p className="font-sign text-[0.65rem] font-bold uppercase tracking-[0.2em] text-river">Optional — not billed unless he says yes</p>
         <h2 className="mt-2 font-display text-3xl font-black uppercase leading-none">Make it completely his</h2>
@@ -165,7 +179,7 @@ export default function InvoicePage() {
       <section className="mt-8 text-sm text-oven/60">
         <p className="font-sign text-[0.6rem] font-bold uppercase tracking-[0.18em] text-oven/45">Not in either phase</p>
         <p className="mt-2 leading-relaxed">
-          Uber Eats / DoorDash marketplace storefronts. Toast or Square POS hardware. Ongoing ads. Domain and hosting after the first year.
+          Uber Eats / DoorDash marketplace storefronts. Toast or Square POS hardware. Ongoing ads. New features and redesigns. Domain registrar after the first year.
         </p>
       </section>
 

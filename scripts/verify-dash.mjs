@@ -87,7 +87,9 @@ async function run() {
   const invoiceHtml = await invoice.text()
   check(invoice.ok, `invoice loads (${invoice.status})`)
   check(/Owner dashboard/.test(invoiceHtml), 'dashboard is on the invoice')
-  check(/Included/.test(invoiceHtml), 'dashboard is bundled, not billed extra')
+  check(/Tech support/.test(invoiceHtml), 'year of support is on the invoice')
+  check(/Included/.test(invoiceHtml), 'bundled lines are not billed extra')
+  check(/\$150/.test(invoiceHtml) && /\$125/.test(invoiceHtml), 'after-year-1 rate is on the invoice')
   check(/\$3,000/.test(invoiceHtml), 'amount due stays $3,000')
 
   const restored = await fetch(`${BASE}/api/dash/data`, {
